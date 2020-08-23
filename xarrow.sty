@@ -119,6 +119,16 @@
   \takescripts{\xarrow@utoexpanded[\mkern3mu]\rightarrow\xarrow@rightarrowfill}}
 
 
+\newcommand{\xarrow@mapstofill}[1]{$\m@th #1
+  \DOTSB \mapstochar\mathrel{\smash{\rlap{$-$}}}
+  {\smash{-}}\mkern-9mu
+  \cleaders\hbox{$#1\mkern -2mu\smash{-}\mkern -2mu$}\hfill
+  \mkern-9mu\mathord\to$}
+
+\newcommand\xmapsto{% eXtensible \mapsto
+  \takescripts{\xarrow@utoexpanded[\mkern 5mu]\mapsto\xarrow@mapstofill}}
+
+
 \newcommand{\xarrow@ptofill}[1]{$\m@th #1
   \raise.16ex\hbox{$\scriptstyle\circ$}\mkern-2.5mu  \smash{-}\mkern-7mu
   \cleaders\hbox{$#1\mkern -2mu\smash{-}\mkern -2mu$}\hfill
