@@ -41,34 +41,35 @@
   \begingroup %                     - for changes of \catcode's to remain local
   \catcode`\^=7  \catcode`\_=8 %    -
   \@ifnextchar^{%                   - take superscript and look for subscript
-        \super@then@subscript{#1}}{%- look for subscript
+        \xarrow@super@then@subscript{#1}}{%- look for subscript
   \@ifnextchar_{%                   - take subscript, then look for superscript
-        \sub@then@superscript{#1}}{%- no super- nor subscript present
-  \takescripts@passtocommand{#1}{}{}\end@takescripts}}}
+        \xarrow@sub@then@superscript{#1}}{%- no super- nor subscript present
+  \xarrow@takescripts@passtocommand{#1}{}{}\xarrow@end@takescripts}}}
 
-  %-- \super@then@subscript <command>^<text>
-  \def\super@then@subscript#1^#2{%- look for subscript
-    \@ifnextchar_{\take@subscript{#1}^{#2}%  #1^{#2} _{...} is expected
-      }{\takescripts@passtocommand{#1}{#2}{}\end@takescripts}}
+  %-- \xarrow@super@then@subscript <command>^<text>
+  \def\xarrow@super@then@subscript#1^#2{%- look for subscript
+    \@ifnextchar_{\xarrow@take@subscript{#1}^{#2}%  #1^{#2} _{...} is expected
+      }{\xarrow@takescripts@passtocommand{#1}{#2}{}\xarrow@end@takescripts}}
 
-  %-- \take@subscript<command>^<text>_#3  (necessary to put \end@takescripts)
-  \def\take@subscript#1^#2_#3{%
-    \takescripts@passtocommand{#1}{#2}{#3}\end@takescripts}
+  % -- \xarrow@take@subscript<command>^<text>_#3 (necessary to
+  % put \xarrow@end@takescripts)
+  \def\xarrow@take@subscript#1^#2_#3{%
+    \xarrow@takescripts@passtocommand{#1}{#2}{#3}\xarrow@end@takescripts}
 
-  %-- \sub@then@superscript <\command's>_#1
-  \def\sub@then@superscript#1_#2{%
-    \@ifnextchar^{\sw@psubsuperscript{#1}_{#2}% ^{...} is expected
-      }{\takescripts@passtocommand{#1}{}{#2}\end@takescripts}}
+  %-- \xarrow@sub@then@superscript <\command's>_#1
+  \def\xarrow@sub@then@superscript#1_#2{%
+    \@ifnextchar^{\xarrow@sw@psubsuperscript{#1}_{#2}% ^{...} is expected
+      }{\xarrow@takescripts@passtocommand{#1}{}{#2}\xarrow@end@takescripts}}
 
-  %-- \sw@psubsuperscript <command>_#2^#3  -->  <command>^#3_#2
-  \def\sw@psubsuperscript#1_#2^#3{%
-    \takescripts@passtocommand{#1}{#3}{#2}\end@takescripts}
+  %-- \xarrow@sw@psubsuperscript <command>_#2^#3  -->  <command>^#3_#2
+  \def\xarrow@sw@psubsuperscript#1_#2^#3{%
+    \xarrow@takescripts@passtocommand{#1}{#3}{#2}\xarrow@end@takescripts}
 
   %-- utility: see Macros.4ht
-  \newcommand{\takescripts@passtocommand}[3]{#1^{#2}_{#3}}
+  \newcommand{\xarrow@takescripts@passtocommand}[3]{#1^{#2}_{#3}}
 
   %-- close the group so that \catcode's of `^' and `_' are restored.
-  \def\end@takescripts{\endgroup}
+  \def\xarrow@end@takescripts{\endgroup}
 
 
 % \putscripts
@@ -80,6 +81,7 @@
 % blank space.  That is interesting when the expression put as sup- or
 % sub-script would produce an undesired blank space.
 
+\ifx\putscripts\@undefined
 \def\putscripts#1^#2_#3^#4_#5{%
   \def\next{#2}\ifx\next\empty % no ^#2 or is a blank space
     \def\next{#3}\ifx\next\empty % neither ^#2 nor _#3
@@ -96,7 +98,11 @@
   \fi
   % the use of \next allows #1 to take further arguments in addition to ^/_ :
   \next}
-
+\else
+\PackageError{xarrow}{%
+  The macro \string\putscripts\space is already defined}{%
+  Please do not define \string\putscripts\space when using this package.}
+\fi
 
 
 %***********************************************************************
@@ -105,96 +111,98 @@
 %
 %***********************************************************************
 
-\newcommand{\rightarrowfill@style}[1]{$\m@th #1\smash{-}\mkern-7mu
+\newcommand{\xarrow@rightarrowfill}[1]{$\m@th #1\smash{-}\mkern-7mu
   \cleaders\hbox{$#1\mkern -2mu\smash{-}\mkern -2mu$}\hfill
   \mkern-7mu\mathord\rightarrow$}
 
 \newcommand{\xto}{% eXtensible \to
-  \takescripts{\@utoexpanded@rrow[\mkern3mu]\rightarrow\rightarrowfill@style}}
+  \takescripts{\xarrow@utoexpanded[\mkern3mu]\rightarrow\xarrow@rightarrowfill}}
 
 
-\newcommand{\ptofill@style}[1]{$\m@th #1
+\newcommand{\xarrow@ptofill}[1]{$\m@th #1
   \raise.16ex\hbox{$\scriptstyle\circ$}\mkern-2.5mu  \smash{-}\mkern-7mu
   \cleaders\hbox{$#1\mkern -2mu\smash{-}\mkern -2mu$}\hfill
   \mkern-7mu\mathord\rightarrow$}
 
 \newcommand{\xpto}{% eXtensible \pto
-  \takescripts{\@utoexpanded@rrow[\mkern3mu]\pto\ptofill@style}}
+  \takescripts{\xarrow@utoexpanded[\mkern3mu]\pto\xarrow@ptofill}}
 
 
-\newcommand{\leftarrowfill@style}[1]{$\m@th #1\mathord\leftarrow\mkern-7mu
+\newcommand{\xarrow@leftarrowfill}[1]{$\m@th #1\mathord\leftarrow\mkern-7mu
   \smash{-}\mkern-7mu
   \cleaders\hbox{$#1\mkern -2mu\smash{-}\mkern -2mu$}\hfill$}
 
 \newcommand{\xfrom}{% eXtensible \leftarrow
-  \takescripts{\@utoexpanded@rrow[\mkern3mu]\leftarrow\leftarrowfill@style}}
+  \takescripts{\xarrow@utoexpanded[\mkern3mu]\leftarrow\xarrow@leftarrowfill}}
 
 
-%--- Comme la semi fleche superieure a une ligne horizontale
-%    de hauteur= 1/2 la hauteur de `-', il faut prolonger la
-%    ligne horizontale SUR la fleche => \llap. (vielle version chars)
+% --- As the harpoonup arrow has (used to have) a horizontal line of
+% height = 1/2 the height of `-', we need to extend the horizontal
+% line ON TOP of the arrow.  Use \llap for that.
 \newcommand{\rightharpoonupthick}{{%
     \mathrel{\mathord\rightharpoonup\llap{$\mathord-$}}}}
-\newcommand{\rightharpoonupfill@style}[1]{$\m@th #1\mathord -\mkern -6mu
+\newcommand{\xarrow@rightharpoonupfill}[1]{$\m@th #1\mathord -\mkern -6mu
   \cleaders\hbox{$#1\mkern -2mu \mathord -\mkern -2mu$}\hfill
   \mkern -6mu\mathord \rightharpoonup$}
 
 \newcommand{\xwto}{\takescripts
-  {\@utoexpanded@rrow[\mkern3mu]\rightharpoonup\rightharpoonupfill@style}}
+  {\xarrow@utoexpanded[\mkern3mu]\rightharpoonup\xarrow@rightharpoonupfill}}
 
 
 
-\newbox\fleche            % basic arrow
-\newbox\audessus          % \audessus  = no de la boite
-\newbox\endessous         % \endessous = no de la boite
-\newbox\ARROW             % well dimensioned arrow
-\newlength\longueur       % length of final arrow
+\newbox\xarrow@box            % basic arrow
+\newbox\xarrow@above          % \xarrow@above  = no de la boite
+\newbox\xarrow@below          % \xarrow@below = no de la boite
+\newbox\xarrow@ARROW             % well dimensioned arrow
+\newlength\xarrow@length       % length of final arrow
 
-%--- \@utoexpanded@rrow[<math skip>]<\arrow><\arrowfill>^#4_#5
+%--- \xarrow@utoexpanded[<math skip>]<\arrow><\arrowfill>^#4_#5
 %    \arrow is supposed to need to be in a math environment (e.g., $...$)
 %    \arrowfill should work in text mode (as \rightarrowfill does)
 %    ->  `^' (resp. `_') are supposed to have the `superscript'
 %        (res.p `subscript') \catcode in order to use \takescripts
 %
-\def\@utoexpanded@rrow[#1]#2#3^#4_#5{\begingroup
+\def\xarrow@utoexpanded[#1]#2#3^#4_#5{\begingroup
                                         %- changes to \box'es are local
   %  \begingroup and NOT `{', because `{' would \mathord the \mathrel...
   %convergence with superscripts and subscripts: the arrow is well dimensioned
   %---------------------------------------------------------------------------
   \mathchoice{%% Display:
-    \@utoexpanded@rrow@{#1}{#2}{#3}{#4}{#5}\textstyle\scriptstyle
+    \xarrow@utoexpanded@{#1}{#2}{#3}{#4}{#5}\textstyle\scriptstyle
     }{%% Text:
-    \@utoexpanded@rrow@{#1}{#2}{#3}{#4}{#5}\textstyle\scriptstyle
+    \xarrow@utoexpanded@{#1}{#2}{#3}{#4}{#5}\textstyle\scriptstyle
     }{%% Script:
-    \@utoexpanded@rrow@{#1}{#2}{#3}{#4}{#5}\scriptstyle\scriptscriptstyle
+    \xarrow@utoexpanded@{#1}{#2}{#3}{#4}{#5}\scriptstyle\scriptscriptstyle
     }{%% Scriptscript:
-    \@utoexpanded@rrow@{#1}{#2}{#3}{#4}{#5}\scriptscriptstyle
+    \xarrow@utoexpanded@{#1}{#2}{#3}{#4}{#5}\scriptscriptstyle
     \scriptscriptstyle}%
   \endgroup}
 
-\newcommand{\@utoexpanded@rrow@}[7]{%
+\newcommand{\xarrow@utoexpanded@}[7]{%
   %% #6 = textstyle, #7 = scriptstyle
-  \setbox\fleche=\hbox{$#6#2$}%- natural arrow
-  \setbox\audessus =\hbox{$#7\mkern7mu {#4}#1\mkern7mu$}%
-  \setbox\endessous=\hbox{$#7\mkern7mu {#5}#1\mkern7mu$}%
-  %%\typeout{\string\wd\string\fleche=\the\wd\fleche,
-  %%       \string\wd\string\audessus=\the\wd\audessus,
-  %%       \string\wd\string\endessous=\the\wd\endessous.}
-  % \longueur := max of widths of { \fleche, \audessus, \endessous }
-  \xarrow@maxiii{\wd\fleche}{\wd\audessus}{\wd\endessous}{\longueur}%
-  %%\typeout{max = \the\longueur}
-  %%\advance \longueur by 6pt  %% done in boxes \audessus \endessous
-  \setbox\ARROW=\hbox to\longueur{#3{#6}}%- \arrowfill with style #6
+  \setbox\xarrow@box=\hbox{$#6#2$}%- natural arrow
+  \setbox\xarrow@above =\hbox{$#7\mkern7mu {#4}#1\mkern7mu$}%
+  \setbox\xarrow@below=\hbox{$#7\mkern7mu {#5}#1\mkern7mu$}%
+  %\typeout{\string\wd\string\xarrow@box=\the\wd\xarrow@box,
+  %       \string\wd\string\xarrow@above=\the\wd\xarrow@above,
+  %       \string\wd\string\xarrow@below=\the\wd\xarrow@below.}
+  %% \xarrow@length
+  %%    := max of widths of { \xarrow@box, \xarrow@above, \xarrow@below }
+  \xarrow@maxiii{\wd\xarrow@box}{\wd\xarrow@above}{\wd\xarrow@below}{%
+    \xarrow@length}%
+  %%\typeout{max = \the\xarrow@length}
+  %%\advance \xarrow@length by 6pt  %% done in boxes \xarrow@above \xarrow@below
+  \setbox\xarrow@ARROW=\hbox to\xarrow@length{#3{#6}}%- \arrowfill with style #6
   %% Resize all boxes to the same length with centering:
-  \setbox\fleche   =\hbox to\longueur{\hfil\unhbox\fleche \hfil}%
-  \setbox\audessus =\hbox to\longueur{\hfil\unhbox\audessus \hfil}%
-  \setbox\endessous=\hbox to\longueur{\hfil\unhbox\endessous \hfil}%
+  \setbox\xarrow@box   =\hbox to\xarrow@length{\hfil\unhbox\xarrow@box \hfil}%
+  \setbox\xarrow@above =\hbox to\xarrow@length{\hfil\unhbox\xarrow@above \hfil}%
+  \setbox\xarrow@below=\hbox to\xarrow@length{\hfil\unhbox\xarrow@below \hfil}%
   %% Final arrow: pack the boxes
-  \setbox\ARROW=\vbox{\offinterlineskip
-    \box\audessus  \vskip 0.2ex  \vtop{%
-      \box\ARROW   \vskip 0.1ex  \box\endessous}}%
+  \setbox\xarrow@ARROW=\vbox{\offinterlineskip
+    \box\xarrow@above  \vskip 0.2ex  \vtop{%
+      \box\xarrow@ARROW   \vskip 0.1ex  \box\xarrow@below}}%
   %% display the arrow as a relation:
-  \mathrel{\box\ARROW}%
+  \mathrel{\box\xarrow@ARROW}%
 }
 
 %--- maximum of 3 arguments
